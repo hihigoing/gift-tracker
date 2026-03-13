@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="人情账">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <title>人情往来账</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 20px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .header p { opacity: 0.9; font-size: 1rem; }
+        
+        /* 统计卡片 */
+        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        @media (min-width: 768px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+        .stat-card {
+            background: white; border-radius: 12px; padding: 15px;
+            text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-card .number { font-size: 1.5rem; font-weight: bold; color: #667eea; }
+        .stat-card .label { color: #666; margin-top: 5px; font-size: 0.85rem; }
+        
+        /* 主内容区 */
+        .main-content { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 768px) { .main-content { grid-template-columns: 1fr 2fr; } }
+        
+        .card {
+            background: white; border-radius: 12px; padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card h2 { color: #333; margin-bottom: 15px; font-size: 1.3rem; border-bottom: 2px solid #667eea; padding-bottom: 8px; }
+        
+        /* 表单 */
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #555; font-weight: 500; font-size: 0.9rem; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px; border: 2px solid #e0e0e0;
+            border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: #667eea;
+        }
+        
+        /* 按钮 */
+        .btn {
+            padding: 12px 24px; border: none; border-radius: 8px;
+            font-size: 1rem; cursor: pointer; transition: all 0.3s; font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; width: 100%;
+        }
+        .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-secondary { background: #f0f0f0; color: #333; padding: 10px 16px; font-size: 0.9rem; }
+        .btn-danger { background: #ff4757; color: white; padding: 6px 12px; font-size: 0.85rem; }
+        .btn-edit { background: #3498db; color: white; padding: 6px 12px; font-size: 0.85rem; }
+        .btn-group { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+        
+        /* 搜索框 */
+        .search-box { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        .search-box input { flex: 1; min-width: 200px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; }
+        
+        /* 记录列表 */
+        .records-list { margin-top: 15px; }
+        .record-item {
+            background: #f8f9fa; border-radius: 8px; padding: 12px;
+            margin-bottom: 10px; border-left: 4px solid #667eea;
+        }
+        .record-item.give { border-left-color: #ff6b6b; }
+        .record-item.receive { border-left-color: #51cf66; }
+        .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .record-name { font-weight: bold; font-size: 1.1rem; }
+        .record-type { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .record-type.give { background: #ffe3e3; color: #c92a2a; }
+        .record-type.receive { background: #d3f9d8; color: #2b8a3e; }
+        .record-amount { font-size: 1.3rem; font-weight: bold; color: #333; }
+        .record-date { color: #666; font-size: 0.9rem; margin-top: 5px; }
+        .record-occasion { color: #666; font-size: 0.85rem; margin-top: 4px; }
+        .record-note { color: #888; font-size: 0.85rem; margin-top: 4px; font-style: italic; }
+        .record-actions { display: flex; gap: 8px; margin-top: 10px; }
+        
+        /* 空状态 */
+        .empty-state { text-align: center; padding: 40px 20px; color: #888; }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 10px; }
+        
+        /* 消息提示 */
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 12px 24px; border-radius: 8px;
+            z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+        .toast.success { background: #51cf66; }
+        .toast.error { background: #ff6b6b; }
+        
+        /* 加载状态 */
+        .loading { text-align: center; padding: 20px; color: #667eea; }
+        .loading::after { content: '⏳'; margin-left: 8px; }
+        
+        /* 导入导出区 */
+        .import-export { margin-top: 15px; padding-top: 15px; border-top: 2px solid #e0e0e0; }
+        .file-input { display: none; }
+        
+        /* 模态框 */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: white; border-radius: 12px; padding: 24px;
+            width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-header h3 { color: #333; font-size: 1.3rem; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💝 人情往来账</h1>
+            <p>记录每一份人情，管理每一笔往来</p>
+        </div>
+        
+        <!-- 统计面板 -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="totalRecords">0</div>
+                <div class="label">总记录</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalGive">¥0</div>
+                <div class="label">送出</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalReceive">¥0</div>
+                <div class="label">收到</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="balance">¥0</div>
+                <div class="label">结余</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <!-- 左侧：添加记录 -->
+            <div class="card">
+                <h2>📝 添加记录</h2>
+                <form id="recordForm">
+                    <input type="hidden" id="recordId">
+                    <div class="form-group">
+                        <label for="name">姓名 *</label>
+                        <input type="text" id="name" required placeholder="请输入姓名">
+                    </div>
+                    <div class="form-group">
+                        <label for="type">类型 *</label>
+                        <select id="type" required>
+                            <option value="give">送出 💸</option>
+                            <option value="receive">收到 💰</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">金额 *</label>
+                        <input type="number" id="amount" required placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="date">日期 *</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="occasion">场合/事由</label>
+                        <input type="text" id="occasion" placeholder="例如：婚礼、生日、乔迁">
+                    </div>
+                    <div class="form-group">
+                        <label for="note">备注</label>
+                        <textarea id="note" rows="2" placeholder="其他说明..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">添加记录</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;width:100%;margin-top:8px;">取消编辑</button>
+                </form>
+                
+                <div class="import-export">
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="exportData()">📤 导出数据</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 导入数据</button>
+                        <input type="file" id="importFile" class="file-input" accept=".json" onchange="importData(event)">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧：记录列表 -->
+            <div class="card">
+                <h2>📋 记录列表</h2>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索姓名、场合、备注..." oninput="searchRecords()">
+                    <button class="btn btn-secondary" onclick="loadRecords()">🔄 刷新</button>
+                </div>
+                <div id="recordsList" class="records-list">
+                    <div class="loading">加载中</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 消息提示 -->
+    <div id="toast" class="toast"></div>
+    
+    <!-- 确认删除模态框 -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚠️ 确认删除</h3>
+                <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <p style="margin-bottom:20px;color:#666;">确定要删除这条记录吗？此操作不可恢复。</p>
+            <div class="btn-group" style="justify-content:flex-end;">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let deleteId = null;
+        
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('date').valueAsDate = new Date();
+            loadRecords();
+            loadStats();
+        });
+        
+        // 表单提交
+        document.getElementById('recordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('recordId').value;
+            const data = {
+                name: document.getElementById('name').value.trim(),
+                type: document.getElementById('type').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                date: document.getElementById('date').value,
+                occasion: document.getElementById('occasion').value.trim(),
+                note: document.getElementById('note').value.trim()
+            };
+            
+            try {
+                const url = id ? `${API_BASE}/api/records/${id}` : `${API_BASE}/api/records`;
+                const method = id ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(id ? '更新成功' : '添加成功', 'success');
+                    resetForm();
+                    loadRecords();
+                    loadStats();
+                } else {
+                    showToast(result.error || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误：' + error.message, 'error');
+            }
+        });
+        
+        // 取消编辑
+        document.getElementById('cancelBtn').addEventListener('click', resetForm);
+        
+        // 加载记录
+        async function loadRecords() {
+            const listEl = document.getElementById('recordsList');
+            listEl.innerHTML = '<div class="loading">加载中</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/records`);
+                const result = await response.json();
+                
+                if (result.success && result.data.length > 0) {
+                    listEl.innerHTML = result.data.map(record => `
+                        <div class="record-item ${record.type}" data-id="${record.id}">
+                            <div class="record-header">
+                                <span class="record-name">${escapeHtml(record.name)}</span>
+                                <span class="record-type ${record.type}">${record.type === 'give' ? '送出 💸' : '收到 💰'}</span>
+                            </div>
+                            <div class="record-amount">¥${parseFloat(record.amount).toFixed(2)}</div>
+                            <div class="record-date">📅 ${record.date}</div>
+                            ${record.occasion ? `<div class="record-occasion">🎉 ${escapeHtml(record.occasion)}</div>` : ''}
+                            ${record.note ? `<div class="record-note">📝 ${escapeHtml(record.note)}</div>` : ''}
+                            <div class="record-actions">
+                                <button class="btn btn-edit" onclick="editRecord(${record.id})">编辑</button>
+                                <button class="btn btn-danger" onclick="showDeleteModal(${record.id})">删除</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📭</div>
+                            <p>暂无记录</p>
+                            <p style="font-size:0.9rem;margin-top:8px;">添加第一条人情往来记录吧</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                listEl.innerHTML = `<div class="empty-state">❌ 加载失败：${error.message}</div>`;
+            }
+        }
+        
+        // 加载统计
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/stats`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('totalRecords').textContent = result.data.totalRecords;
+                    document.getElementById('totalGive').textContent = '¥' + result.data.totalGive.toFixed(2);
+                    document.getElementById('totalReceive').textContent = '¥' + result.data.totalReceive.toFixed(2);
+                    document.getElementById('balance').textContent = '¥' + result.data.balance.toFixed(2);
+                    document.getElementById('balance').style.color = result.data.balance >= 0 ? '#51cf66' : '#ff6b6b';
+                }
+            } catch (error) {
+                console.error('统计加载失败:', error);
+            }
+        }
+        
+        // 搜索记录
+        async function searchRecords() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            const listEl = document.getElementById('recordsList');
+            
+            if (!keyword) {
+                loadRecords();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/records/search?keyword=${encodeURIComponent(keyword)}`);
+                const result = await response.json();
+                
+                if (result.success && result.data.length > 0) {
+                    listEl.innerHTML = result.data.map(record => `
+                        <div class="record-item ${record.type}" data-id="${record.id}">
+                            <div class="record-header">
+                                <span class="record-name">${escapeHtml(record.name)}</span>
+                                <span class="record-type ${record.type}">${record.type === 'give' ? '送出 💸' : '收到 💰'}</span>
+                            </div>
+                            <div class="record-amount">¥${parseFloat(record.amount).toFixed(2)}</div>
+                            <div class="record-date">📅 ${record.date}</div>
+                            ${record.occasion ? `<div class="record-occasion">🎉 ${escapeHtml(record.occasion)}</div>` : ''}
+                            ${record.note ? `<div class="record-note">📝 ${escapeHtml(record.note)}</div>` : ''}
+                            <div class="record-actions">
+                                <button class="btn btn-edit" onclick="editRecord(${record.id})">编辑</button>
+                                <button class="btn btn-danger" onclick="showDeleteModal(${record.id})">删除</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    listEl.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>未找到匹配的记录</p></div>';
+                }
+            } catch (error) {
+                listEl.innerHTML = `<div class="empty-state">❌ 搜索失败：${error.message}</div>`;
+            }
+        }
+        
+        // 编辑记录
+        async function editRecord(id) {
+            try {
+                const response = await fetch(`${API_BASE}/api/records/${id}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const record = result.data;
+                    document.getElementById('recordId').value = record.id;
+                    document.getElementById('name').value = record.name;
+                    document.getElementById('type').value = record.type;
+                    document.getElementById('amount').value = record.amount;
+                    document.getElementById('date').value = record.date;
+                    document.getElementById('occasion').value = record.occasion || '';
+                    document.getElementById('note').value = record.note || '';
+                    
+                    document.getElementById('submitBtn').textContent = '更新记录';
+                    document.getElementById('cancelBtn').style.display = 'block';
+                    
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } catch (error) {
+                showToast('加载记录失败', 'error');
+            }
+        }
+        
+        // 重置表单
+        function resetForm() {
+            document.getElementById('recordForm').reset();
+            document.getElementById('recordId').value = '';
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('submitBtn').textContent = '添加记录';
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+        
+        // 显示删除确认
+        function showDeleteModal(id) {
+            deleteId = id;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+        
+        // 关闭删除确认
+        function closeDeleteModal() {
+            deleteId = null;
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+        
+        // 确认删除
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            if (!deleteId) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/records/${deleteId}`, { method: 'DELETE' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('删除成功', 'success');
+                    closeDeleteModal();
+                    loadRecords();
+                    loadStats();
+                } else {
+                    showToast(result.error || '删除失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+        
+        // 导出数据
+        async function exportData() {
+            try {
+                const response = await fetch(`${API_BASE}/api/records/export`);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `gift-records-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                showToast('导出成功', 'success');
+            } catch (error) {
+                showToast('导出失败：' + error.message, 'error');
+            }
+        }
+        
+        // 导入数据
+        async function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        const records = data.records || data;
+                        
+                        if (!Array.isArray(records)) {
+                            throw new Error('无效的数据格式');
+                        }
+                        
+                        const response = await fetch(`${API_BASE}/api/records/batch`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ records })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            showToast(`成功导入 ${result.count} 条记录`, 'success');
+                            loadRecords();
+                            loadStats();
+                        } else {
+                            showToast(result.error || '导入失败', 'error');
+                        }
+                    } catch (error) {
+                        showToast('文件格式错误：' + error.message, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            } catch (error) {
+                showToast('读取文件失败', 'error');
+            }
+            
+            event.target.value = '';
+        }
+        
+        // 显示提示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            setTimeout(() => toast.className = 'toast', 3000);
+        }
+        
+        // HTML 转义
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 📱 PWA Service Worker 注册
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                  .then((registration) => {
+                    console.log('✅ Service Worker 注册成功:', registration.scope);
+                  })
+                  .catch((error) => {
+                    console.log('❌ Service Worker 注册失败:', error);
+                  });
+            });
+        }
+        
+        // 📱 iOS 安装提示
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('💡 可以安装到主屏幕');
+        });
+    </script>
+</body>
+</html>

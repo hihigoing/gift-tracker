@@ -1,0 +1,23 @@
+# Netlify 配置文件
+
+[build]
+  # 不执行构建命令（纯静态项目）
+  command = "echo 'No build needed'"
+  # 发布目录
+  publish = "public"
+
+# 设置缓存
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# API 重定向（用于本地开发，生产环境使用真实后端）
+[[redirects]]
+  from = "/api/*"
+  to = "http://localhost:3000/api/:splat"
+  status = 200
+  force = true
