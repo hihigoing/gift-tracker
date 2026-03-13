@@ -160,6 +160,16 @@
             </div>
         </div>
         
+        <!-- 关系管理（首页） -->
+        <div class="card" style="margin-bottom:20px;">
+            <h2>👥 关系管理</h2>
+            <div class="btn-group" style="flex-wrap:wrap;">
+                <button class="btn btn-secondary" onclick="showRelationManager()">👥 管理关系绑定</button>
+                <button class="btn btn-secondary" onclick="loadRelationList()">📋 查看已绑定关系</button>
+            </div>
+            <div id="quickRelationStats" style="margin-top:15px;"></div>
+        </div>
+        
         <!-- 关系绑定面板（搜索时显示） -->
         <div class="card" id="relationPanel" style="display:none;margin-bottom:20px;">
             <h2>👥 <span id="relationName"></span> 的往来统计</h2>
@@ -182,7 +192,6 @@
                 </div>
             </div>
             <div class="btn-group" style="margin-top:15px;">
-                <button class="btn btn-secondary" onclick="showRelationManager()">👥 管理关系绑定</button>
                 <button class="btn btn-secondary" onclick="clearRelation()">❌ 清除筛选</button>
             </div>
         </div>
@@ -228,6 +237,16 @@
                     <div class="form-group">
                         <label for="occasion">场合/事由</label>
                         <input type="text" id="occasion" placeholder="例如：婚礼、生日、乔迁">
+                        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">
+                            <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.85rem;" onclick="setOccasion('结婚')">💒 结婚</button>
+                            <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.85rem;" onclick="setOccasion('百日宴')">👶 百日宴</button>
+                            <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.85rem;" onclick="setOccasion('十岁')">🎂 十岁</button>
+                            <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.85rem;" onclick="setOccasion('看病人')">🏥 看病人</button>
+                            <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.85rem;" onclick="setOccasion('白事')">🕯️ 白事</button>
+                            <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.85rem;" onclick="setOccasion('生日')">🎉 生日</button>
+                            <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.85rem;" onclick="setOccasion('乔迁')">🏠 乔迁</button>
+                            <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.85rem;" onclick="setOccasion('升学')">🎓 升学</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="note">备注</label>
@@ -311,6 +330,7 @@
             loadRecords();
             loadStats();
             loadNameList();
+            loadQuickRelationStats();
         });
         
         // 表单提交
@@ -640,11 +660,15 @@
         }
         
         // 显示关系管理器
-        function showRelationManager() {
-            if (!currentSearchKeyword) return;
-            document.getElementById('currentPerson').value = currentSearchKeyword;
-            const relations = JSON.parse(localStorage.getItem('relations') || '{}');
-            document.getElementById('relatedPersons').value = (relations[currentSearchKeyword] || []).join(',');
+        function showRelationManager(person) {
+            if (person) {
+                document.getElementById('currentPerson').value = person;
+                const relations = JSON.parse(localStorage.getItem('relations') || '{}');
+                document.getElementById('relatedPersons').value = (relations[person] || []).join(',');
+            } else {
+                document.getElementById('currentPerson').value = '';
+                document.getElementById('relatedPersons').value = '';
+            }
             document.getElementById('relationModal').classList.add('show');
             loadRelationList();
         }
@@ -694,6 +718,29 @@
             }
         }
         
+        // 加载首页关系统计
+        function loadQuickRelationStats() {
+            const relations = JSON.parse(localStorage.getItem('relations') || '{}');
+            const entries = Object.entries(relations);
+            const container = document.getElementById('quickRelationStats');
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<p style="color:#888;font-size:0.9rem;">暂无绑定关系，点击"管理关系绑定"添加</p>';
+            } else {
+                container.innerHTML = '<h4 style="margin-bottom:10px;font-size:0.95rem;">已绑定的关系：</h4>' + 
+                    entries.slice(0, 5).map(([person, related]) => `
+                        <div style="background:#f8f9fa;padding:8px;border-radius:6px;margin-bottom:6px;font-size:0.9rem;">
+                            <strong>${person}</strong> 
+                            <span style="color:#888;">↔</span> 
+                            ${related.join('、')}
+                        </div>
+                    `).join('');
+                if (entries.length > 5) {
+                    container.innerHTML += `<p style="color:#888;font-size:0.85rem;text-align:center;">还有 ${entries.length - 5} 条关系，点击"查看已绑定关系"查看全部</p>`;
+                }
+            }
+        }
+        
         // 删除关系
         function deleteRelation(person) {
             const relations = JSON.parse(localStorage.getItem('relations') || '{}');
@@ -723,6 +770,11 @@
                 document.getElementById('name').value = name;
             }
         });
+        
+        // 设置场合
+        function setOccasion(value) {
+            document.getElementById('occasion').value = value;
+        }
         
         // 📱 PWA Service Worker 注册
         if ('serviceWorker' in navigator) {
