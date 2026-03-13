@@ -73,6 +73,8 @@
         /* 搜索框 */
         .search-box { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
         .search-box input { flex: 1; min-width: 200px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; }
+        .search-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .search-btn:active { transform: scale(0.98); }
         
         /* 记录列表 */
         .records-list { margin-top: 15px; }
@@ -208,7 +210,8 @@
             <div class="card">
                 <h2>📋 记录列表</h2>
                 <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="搜索姓名、场合、备注..." oninput="searchRecords()">
+                    <input type="text" id="searchInput" placeholder="搜索姓名、场合、备注..." onkeypress="if(event.keyCode===13) searchRecords()">
+                    <button class="btn btn-secondary search-btn" onclick="searchRecords()">🔍 查询</button>
                     <button class="btn btn-secondary" onclick="loadRecords()">🔄 刷新</button>
                 </div>
                 <div id="recordsList" class="records-list">
