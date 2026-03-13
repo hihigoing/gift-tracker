@@ -160,10 +160,42 @@
             </div>
         </div>
         
+        <!-- 关系绑定面板（搜索时显示） -->
+        <div class="card" id="relationPanel" style="display:none;margin-bottom:20px;">
+            <h2>👥 <span id="relationName"></span> 的往来统计</h2>
+            <div class="stats" style="margin-bottom:0;">
+                <div class="stat-card">
+                    <div class="number" id="relTotalGive">¥0</div>
+                    <div class="label">送出</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="relTotalReceive">¥0</div>
+                    <div class="label">收到</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="relBalance">¥0</div>
+                    <div class="label">结余</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="relCount">0</div>
+                    <div class="label">往来次数</div>
+                </div>
+            </div>
+            <div class="btn-group" style="margin-top:15px;">
+                <button class="btn btn-secondary" onclick="showRelationManager()">👥 管理关系绑定</button>
+                <button class="btn btn-secondary" onclick="clearRelation()">❌ 清除筛选</button>
+            </div>
+        </div>
+        
         <div class="main-content">
             <!-- 左侧：添加记录 -->
             <div class="card">
                 <h2>📝 添加记录</h2>
+                <div class="form-group" style="margin-top:15px;">
+                    <label for="nameSelect">选择已有姓名（可选）</label>
+                    <input type="text" id="nameSelect" list="nameList" placeholder="输入或选择姓名">
+                    <datalist id="nameList"></datalist>
+                </div>
                 <form id="recordForm">
                     <input type="hidden" id="recordId">
                     <div class="form-group">
@@ -175,6 +207,14 @@
                         <select id="type" required>
                             <option value="give">送出 💸</option>
                             <option value="receive">收到 💰</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="amountType">金额类型 *</label>
+                        <select id="amountType" required>
+                            <option value="上礼">上礼（大额）</option>
+                            <option value="小礼">小礼（小额）</option>
+                            <option value="其他">其他</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -237,6 +277,29 @@
             </div>
         </div>
     </div>
+    
+    <!-- 关系管理模态框 -->
+    <div id="relationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👥 管理关系绑定</h3>
+                <button class="close-btn" onclick="closeRelationModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>当前查询人</label>
+                <input type="text" id="currentPerson" readonly>
+            </div>
+            <div class="form-group">
+                <label>绑定的人员（逗号分隔）</label>
+                <input type="text" id="relatedPersons" placeholder="例如：张三，李四，王五">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveRelations()">💾 保存关系</button>
+                <button class="btn btn-secondary" onclick="closeRelationModal()">取消</button>
+            </div>
+            <div id="relationList" style="margin-top:20px;"></div>
+        </div>
+    </div>
 
     <script>
         const API_BASE = 'https://fate-tissue-ccd-fellow.trycloudflare.com';
@@ -247,6 +310,7 @@
             document.getElementById('date').valueAsDate = new Date();
             loadRecords();
             loadStats();
+            loadNameList();
         });
         
         // 表单提交
@@ -258,6 +322,7 @@
                 name: document.getElementById('name').value.trim(),
                 type: document.getElementById('type').value,
                 amount: parseFloat(document.getElementById('amount').value),
+                amountType: document.getElementById('amountType').value,
                 date: document.getElementById('date').value,
                 occasion: document.getElementById('occasion').value.trim(),
                 note: document.getElementById('note').value.trim()
@@ -356,6 +421,7 @@
             
             if (!keyword) {
                 loadRecords();
+                clearRelation();
                 return;
             }
             
@@ -364,13 +430,16 @@
                 const result = await response.json();
                 
                 if (result.success && result.data.length > 0) {
+                    // 显示关系统计面板
+                    showRelationPanel(keyword, result.data);
+                    
                     listEl.innerHTML = result.data.map(record => `
                         <div class="record-item ${record.type}" data-id="${record.id}">
                             <div class="record-header">
                                 <span class="record-name">${escapeHtml(record.name)}</span>
                                 <span class="record-type ${record.type}">${record.type === 'give' ? '送出 💸' : '收到 💰'}</span>
                             </div>
-                            <div class="record-amount">¥${parseFloat(record.amount).toFixed(2)}</div>
+                            <div class="record-amount">¥${parseFloat(record.amount).toFixed(2)} ${record.amountType ? `<span style="font-size:0.75rem;color:#888;">(${record.amountType})</span>` : ''}</div>
                             <div class="record-date">📅 ${record.date}</div>
                             ${record.occasion ? `<div class="record-occasion">🎉 ${escapeHtml(record.occasion)}</div>` : ''}
                             ${record.note ? `<div class="record-note">📝 ${escapeHtml(record.note)}</div>` : ''}
@@ -533,6 +602,127 @@
             div.textContent = text;
             return div.innerHTML;
         }
+        
+        // 👥 关系管理功能
+        let currentSearchKeyword = '';
+        
+        // 显示关系面板
+        function showRelationPanel(keyword, records) {
+            currentSearchKeyword = keyword;
+            const panel = document.getElementById('relationPanel');
+            const nameEl = document.getElementById('relationName');
+            
+            nameEl.textContent = keyword;
+            panel.style.display = 'block';
+            
+            // 计算统计数据
+            let give = 0, receive = 0, count = 0;
+            records.forEach(r => {
+                if (r.type === 'give') give += parseFloat(r.amount);
+                else receive += parseFloat(r.amount);
+                count++;
+            });
+            
+            document.getElementById('relTotalGive').textContent = '¥' + give.toFixed(2);
+            document.getElementById('relTotalReceive').textContent = '¥' + receive.toFixed(2);
+            document.getElementById('relBalance').textContent = '¥' + (receive - give).toFixed(2);
+            document.getElementById('relBalance').style.color = (receive - give) >= 0 ? '#51cf66' : '#ff6b6b';
+            document.getElementById('relCount').textContent = count;
+        }
+        
+        // 清除关系筛选
+        function clearRelation() {
+            document.getElementById('relationPanel').style.display = 'none';
+            document.getElementById('searchInput').value = '';
+            currentSearchKeyword = '';
+            loadRecords();
+            loadStats();
+        }
+        
+        // 显示关系管理器
+        function showRelationManager() {
+            if (!currentSearchKeyword) return;
+            document.getElementById('currentPerson').value = currentSearchKeyword;
+            const relations = JSON.parse(localStorage.getItem('relations') || '{}');
+            document.getElementById('relatedPersons').value = (relations[currentSearchKeyword] || []).join(',');
+            document.getElementById('relationModal').classList.add('show');
+            loadRelationList();
+        }
+        
+        // 关闭关系管理器
+        function closeRelationModal() {
+            document.getElementById('relationModal').classList.remove('show');
+        }
+        
+        // 保存关系
+        function saveRelations() {
+            const person = document.getElementById('currentPerson').value.trim();
+            const relatedStr = document.getElementById('relatedPersons').value.trim();
+            const related = relatedStr ? relatedStr.split(/[,,]/).map(s => s.trim()).filter(s => s) : [];
+            
+            const relations = JSON.parse(localStorage.getItem('relations') || '{}');
+            if (related.length > 0) {
+                relations[person] = related;
+            } else {
+                delete relations[person];
+            }
+            localStorage.setItem('relations', JSON.stringify(relations));
+            
+            showToast('关系保存成功', 'success');
+            closeRelationModal();
+            loadRelationList();
+        }
+        
+        // 加载关系列表
+        function loadRelationList() {
+            const relations = JSON.parse(localStorage.getItem('relations') || '{}');
+            const listEl = document.getElementById('relationList');
+            const entries = Object.entries(relations);
+            
+            if (entries.length === 0) {
+                listEl.innerHTML = '<p style="color:#888;text-align:center;">暂无绑定关系</p>';
+            } else {
+                listEl.innerHTML = '<h4 style="margin-bottom:10px;">已绑定的关系：</h4>' + 
+                    entries.map(([person, related]) => `
+                        <div style="background:#f8f9fa;padding:10px;border-radius:8px;margin-bottom:8px;">
+                            <strong>${person}</strong> 
+                            <span style="color:#888;">↔</span> 
+                            ${related.join('、')}
+                            <button class="btn btn-danger" style="float:right;padding:4px 8px;font-size:0.75rem;" onclick="deleteRelation('${person}')">删除</button>
+                        </div>
+                    `).join('');
+            }
+        }
+        
+        // 删除关系
+        function deleteRelation(person) {
+            const relations = JSON.parse(localStorage.getItem('relations') || '{}');
+            delete relations[person];
+            localStorage.setItem('relations', JSON.stringify(relations));
+            loadRelationList();
+        }
+        
+        // 加载人名列表
+        async function loadNameList() {
+            try {
+                const response = await fetch(`${API_BASE}/api/names`);
+                const result = await response.json();
+                if (result.success) {
+                    const datalist = document.getElementById('nameList');
+                    datalist.innerHTML = result.data.map(name => `<option value="${escapeHtml(name)}">`).join('');
+                }
+            } catch (error) {
+                console.error('加载人名列表失败:', error);
+            }
+        }
+        
+        // 选择人名填充
+        document.getElementById('nameSelect').addEventListener('input', (e) => {
+            const name = e.target.value;
+            if (name) {
+                document.getElementById('name').value = name;
+            }
+        });
         
         // 📱 PWA Service Worker 注册
         if ('serviceWorker' in navigator) {

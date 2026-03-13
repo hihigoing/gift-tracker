@@ -37,6 +37,7 @@ async function initDatabase() {
         name VARCHAR(100) NOT NULL COMMENT '姓名',
         type ENUM('give', 'receive') NOT NULL COMMENT '类型：give=送出，receive=收到',
         amount DECIMAL(10, 2) NOT NULL COMMENT '金额',
+        amount_type VARCHAR(20) DEFAULT '其他' COMMENT '金额类型：上礼/小礼/其他',
         date DATE NOT NULL COMMENT '日期',
         occasion VARCHAR(200) COMMENT '场合/事由',
         note TEXT COMMENT '备注',

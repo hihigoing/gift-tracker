@@ -97,7 +97,7 @@ app.get('/api/records/:id', async (req, res) => {
 // 4. 创建记录（增）
 app.post('/api/records', async (req, res) => {
   try {
-    const { name, type, amount, date, occasion, note } = req.body;
+    const { name, type, amount, amountType, date, occasion, note } = req.body;
     
     // 验证必填字段
     if (!name || !type || !amount || !date) {
@@ -119,9 +119,9 @@ app.post('/api/records', async (req, res) => {
     }
     
     const [result] = await pool.query(
-      `INSERT INTO records (name, type, amount, date, occasion, note) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [name, type, amountNum, date, occasion || null, note || null]
+      `INSERT INTO records (name, type, amount, amount_type, date, occasion, note) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [name, type, amountNum, amountType || '其他', date, occasion || null, note || null]
     );
     
     const [newRecord] = await pool.query(
@@ -172,9 +172,9 @@ app.put('/api/records/:id', async (req, res) => {
     
     await pool.query(
       `UPDATE records 
-       SET name = ?, type = ?, amount = ?, date = ?, occasion = ?, note = ?
+       SET name = ?, type = ?, amount = ?, amount_type = ?, date = ?, occasion = ?, note = ?
        WHERE id = ?`,
-      [name, type, amountNum, date, occasion || null, note || null, id]
+      [name, type, amountNum, amountType || '其他', date, occasion || null, note || null, id]
     );
     
     const [updated] = await pool.query(
