@@ -1,0 +1,43 @@
+services:
+  # 后端服务
+  - type: web
+    name: gift-tracker-backend
+    runtime: docker
+    repo: https://github.com/hihigoing/gift-tracker
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: gift-tracker-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: gift-tracker-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: gift-tracker-db
+          property: password
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+
+  # 前端静态网站
+  - type: static
+    name: gift-tracker-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://gift-tracker-backend.onrender.com
+    autoDeploy: true
+
+databases:
+  - name: gift-tracker-db
+    databaseName: gift_tracker
+    user: gift_tracker
+    plan: free
+    ipAllowList: []
