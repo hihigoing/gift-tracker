@@ -1,0 +1,17 @@
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/util/JwtUtil.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/config/SecurityConfig.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/model/User.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/service/UserService.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/filter/JwtAuthenticationFilter.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/model/GiftRecord.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/dto/AuthResponse.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/mapper/UserMapper.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/controller/AuthController.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/dto/RegisterRequest.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/config/MybatisPlusConfig.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/controller/GiftRecordController.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/service/GiftRecordService.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/GiftTrackerApplication.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/mapper/GiftRecordMapper.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/dto/LoginRequest.java
+/Users/dongshucheng/.openclaw/workspace/gift-tracker/backend/src/main/java/com/gifttracker/exception/GlobalExceptionHandler.java

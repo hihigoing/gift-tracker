@@ -1,0 +1,534 @@
+/* 温暖社交风格登录页面 */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fef7f0 0%, #fff5eb 50%, #fffbf7 100%);
+  padding: 20px;
+}
+
+/* 背景渐变 */
+.bg-gradient {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 60% 50% at 10% 90%, rgba(249, 115, 22, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 90% 10%, rgba(239, 68, 68, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(251, 146, 60, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* 网格背景 */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle, rgba(249, 115, 22, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
+/* 浮动装饰 */
+.floating-shapes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 25s ease-in-out infinite;
+}
+
+.shape-1 {
+  width: 300px;
+  height: 300px;
+  background: rgba(249, 115, 22, 0.15);
+  top: -80px;
+  right: -50px;
+  animation-delay: 0s;
+}
+
+.shape-2 {
+  width: 250px;
+  height: 250px;
+  background: rgba(239, 68, 68, 0.1);
+  bottom: -60px;
+  left: -40px;
+  animation-delay: -8s;
+}
+
+.shape-3 {
+  width: 180px;
+  height: 180px;
+  background: rgba(251, 146, 60, 0.12);
+  top: 40%;
+  left: 20%;
+  animation-delay: -15s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -20px) scale(1.05); }
+  66% { transform: translate(-15px, 15px) scale(0.95); }
+}
+
+/* 登录容器 - 左右分栏 */
+.login-container {
+  display: flex;
+  width: 100%;
+  max-width: 900px;
+  min-height: 560px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  box-shadow: 
+    0 4px 6px rgba(249, 115, 22, 0.05),
+    0 20px 50px rgba(249, 115, 22, 0.1),
+    0 40px 80px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  animation: containerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes containerIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 左侧品牌区 */
+.brand-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(251, 146, 60, 0.05) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(249, 115, 22, 0.2), transparent);
+}
+
+.brand-section::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, transparent 70%);
+  top: 20%;
+  right: 10%;
+  border-radius: 50%;
+}
+
+.brand-content {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  animation: fadeSlideIn 0.8s ease 0.2s both;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brand-icon {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+
+.icon-emoji {
+  font-size: 72px;
+  display: block;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 8px 20px rgba(249, 115, 22, 0.2));
+}
+
+.icon-ring {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(249, 115, 22, 0.2);
+  border-radius: 50%;
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.2; }
+}
+
+.brand-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 12px;
+  letter-spacing: -0.5px;
+}
+
+.brand-desc {
+  font-size: 15px;
+  color: #666;
+  margin: 0 0 32px;
+  line-height: 1.6;
+}
+
+.brand-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #555;
+}
+
+.feature-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+}
+
+/* 右侧表单区 */
+.form-section {
+  flex: 1;
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* 标签页 */
+.auth-tabs {
+  animation: formFadeIn 0.6s ease 0.3s both;
+}
+
+@keyframes formFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.auth-tabs .ant-tabs-nav {
+  margin-bottom: 32px;
+}
+
+.auth-tabs .ant-tabs-nav::before {
+  border-bottom: 1px solid rgba(249, 115, 22, 0.1);
+}
+
+.auth-tabs .ant-tabs-tab {
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.auth-tabs .ant-tabs-tab:hover {
+  color: #f97316;
+}
+
+.auth-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #ea580c;
+  font-weight: 600;
+}
+
+.auth-tabs .ant-tabs-ink-bar {
+  height: 3px;
+  background: linear-gradient(90deg, #f97316, #fb923c);
+  border-radius: 3px;
+}
+
+/* 输入框容器 */
+.input-wrapper {
+  margin-bottom: 16px;
+}
+
+.input-wrapper .ant-form-item {
+  margin-bottom: 0;
+}
+
+.input-wrapper .ant-form-item-explain-error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #ef4444;
+}
+
+/* 输入框 */
+.input-wrapper .ant-input {
+  height: 48px;
+  border-radius: 12px;
+  font-size: 14px;
+  background: #fff;
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  color: #333;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.04);
+}
+
+/* 密码输入框外层容器 */
+.input-wrapper .ant-input-affix-wrapper {
+  height: 48px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  padding: 0 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.04);
+}
+
+.input-wrapper .ant-input-affix-wrapper .ant-input {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  height: auto;
+}
+
+.input-wrapper .ant-input::placeholder,
+.input-wrapper .ant-input-affix-wrapper .ant-input::placeholder {
+  color: #aaa;
+}
+
+.input-wrapper .ant-input:hover {
+  border-color: #fb923c;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.08);
+}
+
+.input-wrapper .ant-input-affix-wrapper:hover {
+  border-color: #fb923c;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.08);
+}
+
+.input-wrapper .ant-input:focus,
+.input-wrapper .ant-input-focused {
+  border-color: #f97316;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1), 0 4px 12px rgba(249, 115, 22, 0.08);
+}
+
+.input-wrapper .ant-input-affix-wrapper-focused,
+.input-wrapper .ant-input-affix-wrapper:focus {
+  border-color: #f97316;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1), 0 4px 12px rgba(249, 115, 22, 0.08);
+}
+
+.input-wrapper .ant-input-prefix {
+  color: #fb923c;
+  font-size: 16px;
+  margin-right: 12px;
+}
+
+.input-wrapper .ant-input-suffix {
+  color: #ccc;
+}
+
+/* 提交按钮 */
+.submit-wrapper {
+  margin-top: 28px;
+  margin-bottom: 0;
+}
+
+.submit-wrapper .ant-btn {
+  height: 50px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  border: none;
+  color: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+}
+
+.submit-wrapper .ant-btn:hover {
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  box-shadow: 0 6px 24px rgba(249, 115, 22, 0.4);
+  transform: translateY(-2px);
+}
+
+.submit-wrapper .ant-btn:active {
+  transform: translateY(0);
+}
+
+.submit-wrapper .ant-btn:disabled {
+  background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
+  opacity: 0.7;
+  transform: none;
+}
+
+/* 表单提示 */
+.form-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  font-size: 12px;
+  color: #888;
+}
+
+.form-hint .anticon {
+  color: #22c55e;
+}
+
+/* 表单底部 */
+.form-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 32px;
+}
+
+.footer-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.2), transparent);
+}
+
+.footer-text {
+  font-size: 12px;
+  color: #bbb;
+  white-space: nowrap;
+}
+
+/* 版权信息 */
+.copyright {
+  text-align: center;
+  margin-top: 32px;
+  font-size: 12px;
+  color: #aaa;
+  z-index: 1;
+}
+
+/* 成功提示动画 */
+.success-toast {
+  animation: toastBounce 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastBounce {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    max-width: 400px;
+    min-height: auto;
+  }
+  
+  .brand-section {
+    padding: 40px 32px;
+  }
+  
+  .icon-emoji {
+    font-size: 56px;
+  }
+  
+  .icon-ring {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .brand-title {
+    font-size: 26px;
+  }
+  
+  .brand-features {
+    display: none;
+  }
+  
+  .form-section {
+    padding: 32px;
+  }
+  
+  .form-footer {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: 16px;
+    background: #fff;
+  }
+  
+  .login-container {
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(249, 115, 22, 0.1);
+  }
+  
+  .brand-section {
+    padding: 32px 24px;
+  }
+  
+  .form-section {
+    padding: 24px;
+  }
+  
+  .auth-tabs .ant-tabs-tab {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .input-wrapper .ant-input,
+  .input-wrapper .ant-input-password {
+    height: 44px;
+  }
+  
+  .submit-wrapper .ant-btn {
+    height: 46px;
+  }
+}
